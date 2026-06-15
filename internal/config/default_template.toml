@@ -1,0 +1,33 @@
+# launchdude service config
+# After editing, run `launchdude apply NAME` (or `launchdude restart NAME`)
+# to reload the launchagent with the new settings.
+
+# Required: the service name. Becomes the launchagent label `launchdude.<name>`
+# and the config filename `<name>.toml`. Must match [a-zA-Z0-9][a-zA-Z0-9._-]*.
+name = "{{NAME}}"
+
+# Required: the command to run. Use `exec` for a shell-style single string
+# (parsed into args via shellwords), or `exec_args` for an explicit argv array
+# (no shell parsing — better for args with embedded spaces).
+exec = ""
+# exec_args = ["/usr/local/bin/myapi", "--port", "8080"]
+
+# Optional: working directory before exec.
+# working_dir = "/Users/me/code/myapi"
+
+# Restart on exit. Defaults to false if omitted; template sets true for the
+# common always-on service case.
+keep_alive = true
+
+# Run when the launchagent is loaded (on enable, login, and at boot).
+# Defaults to false if omitted; template sets true for the common case.
+run_at_load = true
+
+# Log paths — leave commented to auto-route to
+# ~/Library/Logs/launchdude/{{NAME}}.{out,err}.log
+# stdout_path = ""
+# stderr_path = ""
+
+[env]
+# PORT = "8080"
+# LOG_LEVEL = "info"

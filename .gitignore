@@ -1,0 +1,5 @@
+/launchdude
+*.test
+*.out
+.DS_Store
+dist/
