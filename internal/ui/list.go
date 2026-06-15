@@ -22,7 +22,7 @@ func PrintList(w io.Writer, entries []*service.Status) {
 		Bold.Render("NAME"),
 		Bold.Render("STATUS"),
 		Bold.Render("PID"),
-		Bold.Render("NOTES"),
+		Bold.Render("INFO"),
 	})
 	for _, st := range entries {
 		rows = append(rows, [4]string{
