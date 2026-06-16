@@ -21,7 +21,7 @@ var logsCmd = &cobra.Command{
 	Use:               "logs NAME",
 	Short:             "Tail the stdout and stderr logs of a service",
 	Long:              "Shells out to `tail`. By default shows both streams with file headers. Use --stdout or --stderr to pick one. Use -f to follow.",
-	Args:              cobra.ExactArgs(1),
+	Args:              requireArgs("NAME"),
 	ValidArgsFunction: serviceNameCompletion,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]

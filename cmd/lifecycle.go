@@ -13,7 +13,7 @@ import (
 var applyCmd = &cobra.Command{
 	Use:               "apply NAME",
 	Short:             "Re-render the plist from the TOML config and reload if loaded",
-	Args:              cobra.ExactArgs(1),
+	Args:              requireArgs("NAME"),
 	ValidArgsFunction: serviceNameCompletion,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
@@ -32,7 +32,7 @@ var editCmd = &cobra.Command{
 Validates on save; if invalid, prompts to re-edit / dump / save-as / discard
 (original file is preserved on discard). Renaming via edit is not allowed —
 delete and recreate to rename. Run ` + "`launchdude apply NAME`" + ` afterward to reload.`,
-	Args:              cobra.ExactArgs(1),
+	Args:              requireArgs("NAME"),
 	ValidArgsFunction: serviceNameCompletion,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
@@ -89,7 +89,7 @@ var (
 		Use:               "delete NAME",
 		Short:             "Stop, deregister, and remove the service",
 		Long:              "Removes the launchagent and the TOML config. Idempotent on each step. Use --force to skip the confirmation prompt.",
-		Args:              cobra.ExactArgs(1),
+		Args:              requireArgs("NAME"),
 		ValidArgsFunction: serviceNameCompletion,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			name := args[0]
@@ -126,7 +126,7 @@ var startCmd = &cobra.Command{
 	Use:               "start NAME",
 	Short:             "Start a loaded service (no-op if already running)",
 	Long:              "Starts whatever plist is currently installed; does not re-render from TOML. Use `apply` or `restart` to pick up TOML changes.",
-	Args:              cobra.ExactArgs(1),
+	Args:              requireArgs("NAME"),
 	ValidArgsFunction: serviceNameCompletion,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
@@ -141,7 +141,7 @@ var startCmd = &cobra.Command{
 var stopCmd = &cobra.Command{
 	Use:               "stop NAME",
 	Short:             "Stop a running service (no-op if already stopped)",
-	Args:              cobra.ExactArgs(1),
+	Args:              requireArgs("NAME"),
 	ValidArgsFunction: serviceNameCompletion,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
@@ -156,7 +156,7 @@ var stopCmd = &cobra.Command{
 var restartCmd = &cobra.Command{
 	Use:               "restart NAME",
 	Short:             "Re-apply the config and restart the service with a fresh process",
-	Args:              cobra.ExactArgs(1),
+	Args:              requireArgs("NAME"),
 	ValidArgsFunction: serviceNameCompletion,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
@@ -175,7 +175,7 @@ var (
 		Use:               "disable NAME",
 		Short:             "Stop and deregister a service (TOML config preserved)",
 		Long:              "Boots the service out of launchd. By default stops it first if running. Idempotent. Use --no-stop to skip the stop.",
-		Args:              cobra.ExactArgs(1),
+		Args:              requireArgs("NAME"),
 		ValidArgsFunction: serviceNameCompletion,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			name := args[0]

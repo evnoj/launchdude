@@ -18,7 +18,7 @@ var enableCmd = &cobra.Command{
 
 Idempotent — running enable on an already-enabled service is a no-op. This is
 the behavior serviceman gets wrong by leaking "already loaded" errors.`,
-	Args:              cobra.ExactArgs(1),
+	Args:              requireArgs("NAME"),
 	ValidArgsFunction: serviceNameCompletion,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
