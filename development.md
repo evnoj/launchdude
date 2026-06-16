@@ -121,3 +121,9 @@ internal/
   service/    Manager — the state machine. All Apply / Enable / Disable / etc. logic
   ui/         lipgloss styles, status/list rendering, interactive editor + recovery prompt
 ```
+
+# install shell completions
+zsh:
+```zsh
+launchdude completion zsh > ~/.config/zsh/completers/_launchdude
+```
