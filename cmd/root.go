@@ -11,6 +11,9 @@ import (
 var (
 	noColor bool
 
+	// version is set via -ldflags at release time; "dev" for local builds.
+	version = "dev"
+
 	// manager is shared by all subcommands. Lazily initialized so tests can
 	// inject a fake by setting this directly before Execute().
 	manager *service.Manager
@@ -26,6 +29,7 @@ var rootCmd = &cobra.Command{
 	Long: `launchdude is a friendly interface to launchctl for managing user-level
 launch agents (~/Library/LaunchAgents). Service configs live as TOML in
 $XDG_CONFIG_HOME/launchdude/services/ and are rendered to plists on demand.`,
+	Version:       version,
 	SilenceUsage:  true,
 	SilenceErrors: true,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
