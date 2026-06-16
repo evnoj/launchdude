@@ -93,6 +93,18 @@ var (
 		ValidArgsFunction: serviceNameCompletion,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			name := args[0]
+			if err := config.ValidateName(name); err != nil {
+				return err
+			}
+			cfgPath, err := config.ServiceConfigPath(name)
+			if err != nil {
+				return err
+			}
+			if _, err := os.Stat(cfgPath); os.IsNotExist(err) {
+				return fmt.Errorf("no service named %q (no config at %s)", name, cfgPath)
+			} else if err != nil {
+				return err
+			}
 			if !deleteForce {
 				fmt.Fprintf(cmd.OutOrStderr(), "delete %s? this removes the launchagent and the config. [y/N] ", config.Label(name))
 				var ans string
