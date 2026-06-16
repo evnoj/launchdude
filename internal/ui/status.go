@@ -10,11 +10,12 @@ import (
 )
 
 // PrintStatus writes a colored status block for a single service to w.
+// The pill row shows two independent axes — [enabled] and [running] — plus
+// any drift/orphan/pending markers. Special states (pending, orphan) replace
+// or augment the two-axis display where appropriate.
 func PrintStatus(w io.Writer, st *service.Status) {
 	label := config.Label(st.Name)
-	pill := pillFor(st)
-
-	fmt.Fprintf(w, "%s  %s\n", Bold.Render(label), pill)
+	fmt.Fprintf(w, "%s  %s\n", Bold.Render(label), pillsFor(st))
 
 	if !st.ConfigExists && st.PlistExists {
 		fmt.Fprintf(w, "  %s\n",
@@ -35,7 +36,7 @@ func PrintStatus(w io.Writer, st *service.Status) {
 			rows = append(rows, [2]string{"PID", fmt.Sprintf("%d", st.PID)})
 		}
 		if st.State != "" {
-			rows = append(rows, [2]string{"State", st.State})
+			rows = append(rows, [2]string{"launchd state", st.State})
 		}
 		rows = append(rows, [2]string{"Last exit", fmt.Sprintf("%d", st.LastExitCode)})
 		if st.Program != "" {
@@ -70,36 +71,44 @@ func PrintStatus(w io.Writer, st *service.Status) {
 	}
 }
 
-func pillFor(st *service.Status) string {
-	switch {
-	case !st.ConfigExists && st.PlistExists:
-		return wrap(Orphan, "orphan")
-	case !st.PlistExists && st.ConfigExists:
+// pillsFor renders the headline pills for a service's status block. The two
+// axes (enabled / running) are always shown when applicable. Special states
+// (pending = config but no plist; orphan = plist but no config) take headline
+// position; modified is shown as an additional pill alongside.
+func pillsFor(st *service.Status) string {
+	// Pending hides the two axes because they're both trivially "no":
+	// there's no plist, so launchd can't know about it.
+	if !st.PlistExists && st.ConfigExists {
 		return wrap(Pending, "pending")
-	case st.Loaded && st.PID > 0:
-		s := wrap(Running, "running")
-		if st.Drifted {
-			s += " " + wrap(Modified, "modified")
-		}
-		return s
+	}
+
+	pills := []string{enabledPill(st), runningPill(st)}
+	if !st.ConfigExists && st.PlistExists {
+		// Orphan: the launchd state is real, so still show enabled/running,
+		// but prepend the orphan flag so it stands out.
+		pills = append([]string{wrap(Orphan, "orphan")}, pills...)
+	}
+	if st.Drifted {
+		pills = append(pills, wrap(Modified, "modified"))
+	}
+	return strings.Join(pills, " ")
+}
+
+func enabledPill(st *service.Status) string {
+	if st.Loaded {
+		return wrap(Running, "enabled")
+	}
+	return wrap(Dim, "disabled")
+}
+
+func runningPill(st *service.Status) string {
+	switch {
+	case st.PID > 0:
+		return wrap(Running, "running")
 	case st.Loaded && st.LastExitCode != 0:
-		s := wrap(Failed, fmt.Sprintf("failed (exit %d)", st.LastExitCode))
-		if st.Drifted {
-			s += " " + wrap(Modified, "modified")
-		}
-		return s
-	case st.Loaded:
-		s := wrap(Stopped, "stopped")
-		if st.Drifted {
-			s += " " + wrap(Modified, "modified")
-		}
-		return s
+		return wrap(Failed, fmt.Sprintf("failed exit %d", st.LastExitCode))
 	default:
-		s := wrap(Stopped, "not loaded")
-		if st.Drifted {
-			s += " " + wrap(Modified, "modified")
-		}
-		return s
+		return wrap(Dim, "stopped")
 	}
 }
 
