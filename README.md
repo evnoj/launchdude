@@ -1,6 +1,10 @@
 A nicer way to work with services on macOS.
 
-Services on macOS are called "launch agents" and managed by `launchd`. Creating them by writing XML `.plist` files and working with them via `launchctl` is not very ergonomic. `launchdude` allows you to write services in a simple TOML format, and it creates a launch agent `.plist` based on the TOML. In addition, it provides a simple CLI to manage launch agents that were created by `launchdude`. 
+> "service" here means a program that runs in the background. Services should often be run at startup and kept alive as long as the computer is running.
+
+Services on macOS are called "launch agents" and managed by `launchd` and its CLI, `launchctl`. The native way of managing these services is by writing XML `.plist` files and working with them via `launchctl`. Unfortunately, the XML format and and the `launchctl` CLI are not very easy to use.
+
+`launchdude` allows you to write services in a simple TOML format, and it creates a launch agent `.plist` based on the TOML. In addition, it provides a simple CLI to manage launch agents that were created by `launchdude`. 
 
 see `launchdude --help`:
 ```
@@ -39,6 +43,10 @@ Use "launchdude [command] --help" for more information about a command.
 Current limitations:
 - limited service customizability
 - only supports user agents
+
+# FAQ
+## Will launchdude interfere with my existing launch agents?
+No. `launchdude` only manages services that are namespaced via a "launchdude" prefix, meaning the `.plist` file is prefixed with `launchdude.` and the launch agent label is prefixed with `launchdude.`
 
 <details>
 <summary>LLM disclosure</summary>
