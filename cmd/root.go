@@ -45,7 +45,7 @@ $XDG_CONFIG_HOME/launchdude/services/ and are rendered to plists on demand.`,
 func init() {
 	rootCmd.PersistentFlags().BoolVar(&noColor, "no-color", false, "disable colored output")
 	rootCmd.AddCommand(
-		createCmd, enableCmd, statusCmd,
+		createCmd, enableCmd, statusCmd, showCmd,
 		applyCmd, editCmd, deleteCmd, importCmd,
 		startCmd, stopCmd, restartCmd, disableCmd,
 		listCmd, logsCmd, doctorCmd,

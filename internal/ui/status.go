@@ -3,6 +3,7 @@ package ui
 import (
 	"fmt"
 	"io"
+	"sort"
 	"strings"
 
 	"github.com/evnoj/launchdude/internal/config"
@@ -14,9 +15,26 @@ import (
 // any drift/orphan/pending markers. Special states (pending, orphan) replace
 // or augment the two-axis display where appropriate.
 func PrintStatus(w io.Writer, st *service.Status) {
+	printHeadline(w, st)
+	printWarnings(w, st)
+	printRows(w, statusRows(st))
+}
+
+// PrintShow writes the full status block (PrintStatus) plus the properties
+// defined in the service's TOML config. svc may be nil (config missing or
+// unparseable), in which case only the state block is printed.
+func PrintShow(w io.Writer, st *service.Status, svc *config.Service) {
+	printHeadline(w, st)
+	printWarnings(w, st)
+	printRows(w, append(statusRows(st), propertyRows(svc)...))
+}
+
+func printHeadline(w io.Writer, st *service.Status) {
 	label := config.Label(st.Name)
 	fmt.Fprintf(w, "%s  %s\n", Bold.Render(label), pillsFor(st))
+}
 
+func printWarnings(w io.Writer, st *service.Status) {
 	if !st.ConfigExists && st.PlistExists {
 		fmt.Fprintf(w, "  %s\n",
 			Warn.Render("orphan: plist exists but no config; run `launchdude doctor` or `launchdude import "+st.Name+"`"))
@@ -29,7 +47,11 @@ func PrintStatus(w io.Writer, st *service.Status) {
 		fmt.Fprintf(w, "  %s\n",
 			Dim.Render("plist not installed; run `launchdude enable "+st.Name+"` to install and start"))
 	}
+}
 
+// statusRows builds the aligned key/value rows describing live state and the
+// resolved on-disk paths.
+func statusRows(st *service.Status) [][2]string {
 	rows := [][2]string{}
 	if st.Loaded {
 		if st.PID > 0 {
@@ -58,7 +80,41 @@ func PrintStatus(w io.Writer, st *service.Status) {
 	if st.WorkingDir != "" {
 		rows = append(rows, [2]string{"Working dir", st.WorkingDir})
 	}
+	return rows
+}
 
+// propertyRows builds the aligned key/value rows describing the properties
+// defined in the service's TOML config. Returns nil when svc is nil.
+func propertyRows(svc *config.Service) [][2]string {
+	if svc == nil {
+		return nil
+	}
+	var rows [][2]string
+	if svc.Exec != "" {
+		rows = append(rows, [2]string{"Exec", svc.Exec})
+	}
+	if len(svc.ExecArgs) > 0 {
+		rows = append(rows, [2]string{"Args", strings.Join(svc.ExecArgs, " ")})
+	}
+	rows = append(rows, [2]string{"Keep alive", fmt.Sprintf("%t", svc.KeepAlive)})
+	rows = append(rows, [2]string{"Run at load", fmt.Sprintf("%t", svc.RunAtLoad)})
+	if len(svc.Env) > 0 {
+		keys := make([]string, 0, len(svc.Env))
+		for k := range svc.Env {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		parts := make([]string, len(keys))
+		for i, k := range keys {
+			parts[i] = k + "=" + svc.Env[k]
+		}
+		rows = append(rows, [2]string{"Env", strings.Join(parts, " ")})
+	}
+	return rows
+}
+
+// printRows writes an aligned key/value block, padding keys to a common width.
+func printRows(w io.Writer, rows [][2]string) {
 	keyWidth := 0
 	for _, r := range rows {
 		if n := len(r[0]); n > keyWidth {

@@ -29,6 +29,7 @@ Available Commands:
   list        List all launchdude services and their state
   logs        Tail the stdout and stderr logs of a service
   restart     Re-apply the config and restart the service with a fresh process
+  show        Show a service's state and configured properties
   start       Start a loaded service (no-op if already running)
   status      Show the current state of a service
   stop        Stop a running service (no-op if already stopped)
